@@ -12,6 +12,10 @@
     {
       "src": "main.js",
       "use": "@vercel/static"
+    },
+    {
+      "src": "schedule-data.js",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
@@ -26,6 +30,10 @@
     {
       "src": "/main.js",
       "dest": "/main.js"
+    },
+    {
+      "src": "/schedule-data.js",
+      "dest": "/schedule-data.js"
     },
     {
       "src": "/(.*)",

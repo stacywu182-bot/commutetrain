@@ -1,4 +1,4 @@
-const stations = [
+const fallbackStations = [
   ["San Francisco", 37.7764, -122.3945],
   ["22nd Street", 37.7576, -122.3925],
   ["Bayshore", 37.7076, -122.4019],
@@ -26,7 +26,11 @@ const stations = [
   ["Morgan Hill", 37.1297, -121.6504],
   ["San Martin", 37.0853, -121.6104],
   ["Gilroy", 37.0036, -121.5662]
-].map((row, index) => ({ name: row[0], lat: row[1], lng: row[2], index }));
+].map((row, index) => ({ id: row[0].toLowerCase().replace(/[^a-z0-9]+/g, "_"), name: row[0], lat: row[1], lng: row[2], index }));
+
+const scheduleData = window.CALTRAIN_SCHEDULE_DATA || { stations: fallbackStations, trips: [] };
+const stations = scheduleData.stations.map((station, index) => ({ ...station, index }));
+const scheduleTrips = scheduleData.trips || [];
 
 const fallbackCoffee = {
   Sunnyvale: [
@@ -74,6 +78,10 @@ function init() {
     routeToSelect.append(createStationOption(station));
   });
 
+  if (!stations.some((station) => station.name === state.station)) state.station = "Sunnyvale";
+  if (!stations.some((station) => station.name === state.routeFrom)) state.routeFrom = "Sunnyvale";
+  if (!stations.some((station) => station.name === state.routeTo)) state.routeTo = "San Francisco";
+
   stationSelect.value = state.station;
   routeFromSelect.value = state.routeFrom;
   routeToSelect.value = state.routeTo;
@@ -104,7 +112,10 @@ function bindEvents() {
   $("refreshBtn").addEventListener("click", renderAll);
   $("coffeeRefreshBtn").addEventListener("click", renderCoffee);
   $("nearestBtn").addEventListener("click", useNearestStation);
-  $("notifyBtn").addEventListener("click", enableNotifications);
+  $("notifyBtn").addEventListener("click", () => {
+    $("alertStrip").textContent = "Realtime alerts will be added after the 511 token is available.";
+    $("alertStrip").classList.add("visible");
+  });
   routeFromSelect.addEventListener("change", () => {
     state.routeFrom = routeFromSelect.value;
     preventSameRouteStation("from");
@@ -166,7 +177,6 @@ function renderDashboard() {
   const trains = getUpcomingTrains(station, state.direction);
   const bestTrain = trains[0];
   const directionName = state.direction === "north" ? "San Francisco" : "San Jose";
-  const delayed = trains.filter((train) => train.delay >= 8);
 
   $("dashboardTitle").textContent = `${station.name} to ${directionName}`;
   $("pinnedStation").textContent = station.name;
@@ -174,18 +184,9 @@ function renderDashboard() {
   $("trainCount").textContent = trains.length;
   $("updatedAt").textContent = new Intl.DateTimeFormat([], { hour: "numeric", minute: "2-digit" }).format(new Date());
   $("leaveWindow").textContent = bestTrain ? `Aim for ${formatTime(addMinutes(bestTrain.departure, -8))}` : "No trains in window";
-  $("statusPill").textContent = delayed.length ? `${delayed.length} delayed` : "On schedule";
-  $("statusPill").classList.toggle("danger", delayed.length > 1);
-
-  const alertStrip = $("alertStrip");
-  if (delayed.length) {
-    const train = delayed[0];
-    alertStrip.textContent = `Heads up: train ${train.number} is currently showing a ${train.delay} min delay.`;
-    alertStrip.classList.add("visible");
-    maybeNotify(train);
-  } else {
-    alertStrip.classList.remove("visible");
-  }
+  $("statusPill").textContent = "Scheduled only";
+  $("statusPill").classList.remove("danger");
+  $("alertStrip").classList.remove("visible");
 
   renderTrainCards($("timeline"), trains);
 }
@@ -210,8 +211,6 @@ function renderSchedule() {
   trips.forEach((trip) => {
     const row = document.createElement("article");
     row.className = "schedule-row";
-    const estimatedArrival = addMinutes(trip.arrival, trip.delay);
-    const delayText = trip.delay ? `ETA +${trip.delay} min` : "On time ETA";
     row.innerHTML = `
       <div>
         <div class="schedule-number">#${trip.number}</div>
@@ -222,8 +221,8 @@ function renderSchedule() {
         <div class="schedule-label">Scheduled time</div>
       </div>
       <div>
-        <div class="schedule-eta">${formatTime(estimatedArrival)}</div>
-        <div class="schedule-label">${delayText}</div>
+        <div class="schedule-eta">${formatTime(trip.arrival)}</div>
+        <div class="schedule-label">Scheduled arrival</div>
       </div>
       <div>
         <div class="schedule-duration">${trip.duration} mins</div>
@@ -239,17 +238,16 @@ function renderTrainCards(container, trains) {
   trains.forEach((train) => {
     const card = document.createElement("article");
     card.className = "train-card";
-    const delayText = train.delay ? `<span class="delay">+${train.delay} min</span>` : "On time";
     card.innerHTML = `
       <div>
-        <div class="train-time">${formatTime(addMinutes(train.departure, train.delay))}</div>
+        <div class="train-time">${formatTime(train.departure)}</div>
         <div class="train-meta">Scheduled ${formatTime(train.departure)}</div>
       </div>
       <div>
         <strong>${train.kind} train ${train.number}</strong>
         <div class="train-meta">${train.stops} stops to ${train.terminal}</div>
       </div>
-      <span class="train-badge">${delayText}</span>
+      <span class="train-badge">Scheduled</span>
     `;
     container.append(card);
   });
@@ -363,65 +361,44 @@ function maybeNotify(train) {
 
 function getUpcomingTrains(station, direction) {
   const now = new Date();
-  const start = roundUpToNextInterval(now, 6);
-  const isNorth = direction === "north";
-  const terminal = isNorth ? "San Francisco" : "San Jose Diridon";
-  const travelBias = isNorth ? stations.length - station.index : station.index + 1;
-  const frequency = isPeak(now) ? 18 : 28;
-  const trains = [];
+  const nowMinutes = minutesSinceServiceDayStart(now);
+  const service = serviceForDate(now);
 
-  for (let i = 0; i < 8; i += 1) {
-    const departure = addMinutes(start, i * frequency + ((station.index * 3) % 11));
-    if (departure - now > 2 * 60 * 60 * 1000) break;
-    const seed = departure.getHours() * 13 + departure.getMinutes() + station.index * 7 + i;
-    const delay = seed % 9 === 0 ? 12 : seed % 7 === 0 ? 6 : seed % 13 === 0 ? 3 : 0;
-    const limited = i % 3 === 1;
-    trains.push({
-      departure,
-      delay,
-      terminal,
-      kind: limited ? "Limited" : "Local",
-      number: `${isNorth ? 1 : 4}${(station.index + i * 3 + 10).toString().padStart(2, "0")}`,
-      stops: limited ? Math.max(4, Math.round(travelBias / 3)) : Math.max(7, Math.round(travelBias / 2))
-    });
-  }
-
-  return trains;
+  return scheduleTrips
+    .filter((trip) => trip.s === service && trip.d === direction)
+    .map((trip) => tripForStation(trip, station.id))
+    .filter(Boolean)
+    .filter((trip) => trip.departureMinutes >= nowMinutes && trip.departureMinutes <= nowMinutes + 120)
+    .sort((a, b) => a.departureMinutes - b.departureMinutes)
+    .slice(0, 8)
+    .map((trip) => ({
+      departure: dateFromServiceMinutes(now, trip.departureMinutes),
+      terminal: trip.headsign,
+      kind: trip.kind,
+      number: trip.number,
+      stops: trip.stops
+    }));
 }
 
 function getRouteSchedule(from, to, serviceDay) {
   const now = new Date();
-  const direction = to.index < from.index ? "north" : "south";
-  const stationDistance = Math.abs(to.index - from.index);
-  const frequency = serviceDay === "weekday" ? (isPeak(now) ? 30 : 35) : 60;
-  const start = roundUpToNextInterval(now, serviceDay === "weekday" ? 5 : 10);
-  const trips = [];
+  const nowMinutes = minutesSinceServiceDayStart(now);
 
-  for (let i = 0; i < 8; i += 1) {
-    const departure = addMinutes(start, i * frequency + ((from.index * 2) % 8));
-    const limited = serviceDay === "weekday" && i % 3 === 1 && stationDistance > 6;
-    const duration = estimateTravelMinutes(stationDistance, limited);
-    const seed = departure.getHours() * 11 + departure.getMinutes() + from.index + to.index + i;
-    const delay = seed % 10 === 0 ? 9 : seed % 7 === 0 ? 4 : 0;
-
-    trips.push({
-      departure,
-      arrival: addMinutes(departure, duration),
-      delay,
-      duration,
-      kind: limited ? "Limited" : "Local",
-      number: `${direction === "north" ? 1 : 4}${(from.index + to.index + i * 2 + 20).toString().padStart(2, "0")}`,
-      stops: limited ? Math.max(2, Math.ceil(stationDistance / 3)) : stationDistance
-    });
-  }
-
-  return trips;
-}
-
-function estimateTravelMinutes(stationDistance, limited) {
-  const base = limited ? 8 : 10;
-  const perStop = limited ? 3.6 : 4.2;
-  return Math.max(8, Math.round(base + stationDistance * perStop));
+  return scheduleTrips
+    .filter((trip) => trip.s === serviceDay)
+    .map((trip) => tripBetweenStations(trip, from.id, to.id))
+    .filter(Boolean)
+    .filter((trip) => trip.departureMinutes >= nowMinutes - 30)
+    .sort((a, b) => a.departureMinutes - b.departureMinutes)
+    .slice(0, 8)
+    .map((trip) => ({
+      departure: dateFromServiceMinutes(now, trip.departureMinutes),
+      arrival: dateFromServiceMinutes(now, trip.arrivalMinutes),
+      duration: trip.arrivalMinutes - trip.departureMinutes,
+      kind: trip.kind,
+      number: trip.number,
+      stops: trip.stops
+    }));
 }
 
 function preventSameRouteStation(changedSide) {
@@ -439,7 +416,7 @@ function preventSameRouteStation(changedSide) {
 }
 
 function getStation(name) {
-  return stations.find((station) => station.name === name) || stations[17];
+  return stations.find((station) => station.name === name || station.id === name) || stations.find((station) => station.name === "Sunnyvale") || stations[0];
 }
 
 function createStationOption(station) {
@@ -447,13 +424,6 @@ function createStationOption(station) {
   option.value = station.name;
   option.textContent = station.name;
   return option;
-}
-
-function roundUpToNextInterval(date, interval) {
-  const next = new Date(date);
-  const minutes = next.getMinutes();
-  next.setMinutes(Math.ceil(minutes / interval) * interval, 0, 0);
-  return next;
 }
 
 function addMinutes(date, minutes) {
@@ -464,11 +434,6 @@ function formatTime(date) {
   return new Intl.DateTimeFormat([], { hour: "numeric", minute: "2-digit" }).format(date);
 }
 
-function isPeak(date) {
-  const hour = date.getHours();
-  return (hour >= 6 && hour <= 9) || (hour >= 16 && hour <= 19);
-}
-
 function distanceMiles(lat1, lon1, lat2, lon2) {
   const toRad = (value) => (value * Math.PI) / 180;
   const radius = 3958.8;
@@ -476,6 +441,55 @@ function distanceMiles(lat1, lon1, lat2, lon2) {
   const dLon = toRad(lon2 - lon1);
   const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
   return radius * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function serviceForDate(date) {
+  const day = date.getDay();
+  return day === 0 || day === 6 ? "weekend" : "weekday";
+}
+
+function tripForStation(trip, stationId) {
+  const stopIndex = trip.t.findIndex((stop) => stop[0] === stationId);
+  if (stopIndex === -1) return null;
+  const stop = trip.t[stopIndex];
+  return {
+    number: trip.n,
+    headsign: trip.h,
+    kind: trip.k,
+    departureMinutes: parseGtfsTime(stop[2]),
+    stops: Math.max(0, trip.t.length - stopIndex - 1)
+  };
+}
+
+function tripBetweenStations(trip, fromId, toId) {
+  const fromIndex = trip.t.findIndex((stop) => stop[0] === fromId);
+  const toIndex = trip.t.findIndex((stop) => stop[0] === toId);
+  if (fromIndex === -1 || toIndex === -1 || fromIndex >= toIndex) return null;
+
+  const fromStop = trip.t[fromIndex];
+  const toStop = trip.t[toIndex];
+  return {
+    number: trip.n,
+    kind: trip.k,
+    departureMinutes: parseGtfsTime(fromStop[2]),
+    arrivalMinutes: parseGtfsTime(toStop[1]),
+    stops: toIndex - fromIndex
+  };
+}
+
+function parseGtfsTime(time) {
+  const [hours, minutes, seconds] = time.split(":").map(Number);
+  return hours * 60 + minutes + Math.round((seconds || 0) / 60);
+}
+
+function minutesSinceServiceDayStart(date) {
+  return date.getHours() * 60 + date.getMinutes();
+}
+
+function dateFromServiceMinutes(anchorDate, minutes) {
+  const date = new Date(anchorDate);
+  date.setHours(0, 0, 0, 0);
+  return addMinutes(date, minutes);
 }
 
 init();

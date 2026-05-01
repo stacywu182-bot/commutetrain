@@ -37,9 +37,17 @@ http://127.0.0.1:5173
 
 ## Data Notes
 
-This prototype uses local Caltrain station coordinates and a deterministic schedule/delay simulator so the product flow is usable immediately. The live-data path should connect to 511 SF Bay Open Data GTFS-Realtime feeds for Trip Updates, Vehicle Positions, and Service Alerts. 511 requires a free API token.
+This app uses the public Caltrain static GTFS schedule feed for scheduled train times. Realtime delay, vehicle position, and service alert data should connect to 511 SF Bay GTFS-Realtime feeds after a 511 API token is available.
 
 Coffee search uses OpenStreetMap Overpass when available and falls back to curated local examples.
+
+## Refresh Schedule Data
+
+Download the current Caltrain GTFS zip and rebuild `schedule-data.js`:
+
+```powershell
+node scripts/build-schedule.js C:\tmp\caltrain-gtfs\feed schedule-data.js
+```
 
 ## Publish With Vercel
 
