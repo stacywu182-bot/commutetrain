@@ -16,6 +16,7 @@ CommuteTrain is a mobile-friendly Caltrain companion for checking scheduled trai
 - Compare weekday and weekend scheduled trips.
 - View all Caltrain stations on a map.
 - Find nearby coffee shops using OpenStreetMap Overpass, with fallback suggestions.
+- Preview a "Ride Bites" commute content hub for YouTube, Spotify, and podcasts.
 - Enjoy lightweight commute animations on refresh and station changes.
 
 ## Data
