@@ -120,15 +120,11 @@ select {
   gap: 14px;
 }
 
-.brand-mark {
+.brand-logo {
   width: 48px;
   height: 48px;
-  display: grid;
-  place-items: center;
   border-radius: 8px;
-  background: var(--gold);
-  color: #102623;
-  font-weight: 800;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.22);
 }
 
 h1,

@@ -16,6 +16,10 @@
     {
       "src": "schedule-data.js",
       "use": "@vercel/static"
+    },
+    {
+      "src": "assets/commutetrain-logo.svg",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
@@ -34,6 +38,10 @@
     {
       "src": "/schedule-data.js",
       "dest": "/schedule-data.js"
+    },
+    {
+      "src": "/assets/(.*)",
+      "dest": "/assets/$1"
     },
     {
       "src": "/(.*)",
