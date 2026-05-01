@@ -99,6 +99,7 @@ function bindEvents() {
     state.station = stationSelect.value;
     state.selectedMapStation = state.station;
     persist();
+    dropEmoji(["🚉", "🚆", "☕️"]);
     renderAll();
   });
 
@@ -110,7 +111,10 @@ function bindEvents() {
     });
   });
 
-  $("refreshBtn").addEventListener("click", renderAll);
+  $("refreshBtn").addEventListener("click", () => {
+    dropEmoji(["🚆", "☕️", "💴", "⏱️", "🌁"]);
+    renderAll();
+  });
   $("coffeeRefreshBtn").addEventListener("click", renderCoffee);
   $("nearestBtn").addEventListener("click", useNearestStation);
   $("notifyBtn").addEventListener("click", () => {
@@ -148,6 +152,7 @@ function bindEvents() {
       state.leaveBuffer = Number(button.dataset.buffer);
       persist();
       syncBufferButtons();
+      dropEmoji(["⏱️", "🚆", "💴"], 5);
       renderDashboard();
     });
   });
@@ -181,6 +186,25 @@ function renderAll() {
   renderSchedule();
   renderMapList();
   renderCoffee();
+}
+
+function dropEmoji(pool = ["🚆", "☕️", "💴", "⏱️", "🌁"], count = 8) {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const layer = $("confettiLayer");
+  if (!layer) return;
+
+  for (let i = 0; i < count; i += 1) {
+    const emoji = document.createElement("span");
+    emoji.className = "emoji-drop";
+    emoji.textContent = pool[Math.floor(Math.random() * pool.length)];
+    emoji.style.setProperty("--x", `${10 + Math.random() * 80}vw`);
+    emoji.style.setProperty("--size", `${1.1 + Math.random() * 1.1}rem`);
+    emoji.style.setProperty("--duration", `${900 + Math.random() * 700}ms`);
+    emoji.style.setProperty("--rotate", `${-50 + Math.random() * 100}deg`);
+    emoji.style.animationDelay = `${i * 35}ms`;
+    layer.append(emoji);
+    setTimeout(() => emoji.remove(), 1900);
+  }
 }
 
 function syncBufferButtons() {
