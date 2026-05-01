@@ -298,6 +298,54 @@ main {
   gap: 12px;
 }
 
+.leave-buffer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfcfb;
+}
+
+.leave-buffer span {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.buffer-options {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(38px, 1fr));
+  gap: 4px;
+  padding: 4px;
+  border-radius: 8px;
+  background: #e7ebe9;
+}
+
+.buffer-seg {
+  min-height: 32px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 0.86rem;
+  font-weight: 850;
+}
+
+.buffer-seg::after {
+  content: "m";
+  font-weight: 750;
+}
+
+.buffer-seg.active {
+  color: #102623;
+  background: var(--gold);
+}
+
 .train-card {
   display: grid;
   grid-template-columns: 92px 1fr auto;
@@ -576,6 +624,11 @@ dd {
     grid-template-columns: 1fr;
     gap: 8px;
     padding: 12px;
+  }
+
+  .leave-buffer {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .train-time {

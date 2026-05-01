@@ -61,6 +61,7 @@ const state = {
   routeFrom: localStorage.getItem("routeFrom") || "Sunnyvale",
   routeTo: localStorage.getItem("routeTo") || "San Francisco",
   serviceDay: localStorage.getItem("serviceDay") || "weekday",
+  leaveBuffer: Number(localStorage.getItem("leaveBuffer") || 10),
   selectedMapStation: "Sunnyvale",
   map: null,
   markers: []
@@ -142,6 +143,13 @@ function bindEvents() {
       renderSchedule();
     });
   });
+  document.querySelectorAll(".buffer-seg").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.leaveBuffer = Number(button.dataset.buffer);
+      persist();
+      renderDashboard();
+    });
+  });
 }
 
 function switchView(viewId) {
@@ -161,11 +169,13 @@ function persist() {
   localStorage.setItem("routeFrom", state.routeFrom);
   localStorage.setItem("routeTo", state.routeTo);
   localStorage.setItem("serviceDay", state.serviceDay);
+  localStorage.setItem("leaveBuffer", String(state.leaveBuffer));
 }
 
 function renderAll() {
   document.querySelectorAll(".seg").forEach((button) => button.classList.toggle("active", button.dataset.direction === state.direction));
   document.querySelectorAll(".day-seg").forEach((button) => button.classList.toggle("active", button.dataset.service === state.serviceDay));
+  document.querySelectorAll(".buffer-seg").forEach((button) => button.classList.toggle("active", Number(button.dataset.buffer) === state.leaveBuffer));
   renderDashboard();
   renderSchedule();
   renderMapList();
@@ -183,7 +193,7 @@ function renderDashboard() {
   $("directionLabel").textContent = state.direction === "north" ? "Northbound" : "Southbound";
   $("trainCount").textContent = trains.length;
   $("updatedAt").textContent = new Intl.DateTimeFormat([], { hour: "numeric", minute: "2-digit" }).format(new Date());
-  $("leaveWindow").textContent = bestTrain ? `Aim for ${formatTime(addMinutes(bestTrain.departure, -8))}` : "No trains in window";
+  $("leaveWindow").textContent = bestTrain ? `Aim for ${formatTime(addMinutes(bestTrain.departure, -state.leaveBuffer))}` : "No trains in window";
   $("statusPill").textContent = "Scheduled only";
   $("statusPill").classList.remove("danger");
   $("alertStrip").classList.remove("visible");
