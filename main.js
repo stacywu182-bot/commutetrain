@@ -147,6 +147,7 @@ function bindEvents() {
     button.addEventListener("click", () => {
       state.leaveBuffer = Number(button.dataset.buffer);
       persist();
+      syncBufferButtons();
       renderDashboard();
     });
   });
@@ -175,11 +176,17 @@ function persist() {
 function renderAll() {
   document.querySelectorAll(".seg").forEach((button) => button.classList.toggle("active", button.dataset.direction === state.direction));
   document.querySelectorAll(".day-seg").forEach((button) => button.classList.toggle("active", button.dataset.service === state.serviceDay));
-  document.querySelectorAll(".buffer-seg").forEach((button) => button.classList.toggle("active", Number(button.dataset.buffer) === state.leaveBuffer));
+  syncBufferButtons();
   renderDashboard();
   renderSchedule();
   renderMapList();
   renderCoffee();
+}
+
+function syncBufferButtons() {
+  document.querySelectorAll(".buffer-seg").forEach((button) => {
+    button.classList.toggle("active", Number(button.dataset.buffer) === state.leaveBuffer);
+  });
 }
 
 function renderDashboard() {
