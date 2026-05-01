@@ -1,0 +1,636 @@
+:root {
+  --ink: #152022;
+  --muted: #657174;
+  --line: #d9e1df;
+  --surface: #f7f6f0;
+  --panel: #ffffff;
+  --accent: #0e7c66;
+  --accent-strong: #075a4b;
+  --warn: #b8631d;
+  --danger: #b42318;
+  --sky: #dbeaf5;
+  --gold: #f6d36b;
+  --shadow: 0 18px 50px rgba(21, 32, 34, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--ink);
+  background: var(--surface);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+button,
+select {
+  font: inherit;
+}
+
+.app-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+}
+
+.rail {
+  background: #102623;
+  color: #fff;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.brand-mark {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--gold);
+  color: #102623;
+  font-weight: 800;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: 1rem;
+}
+
+.brand p,
+.eyebrow {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.rail .brand p,
+.rail label {
+  color: #b7c6c2;
+}
+
+.nav {
+  display: grid;
+  gap: 8px;
+}
+
+.nav-item,
+.ghost-button,
+.primary-button,
+.icon-button,
+.seg {
+  border: 0;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.nav-item {
+  color: #d6e4e0;
+  background: transparent;
+  text-align: left;
+  padding: 12px 14px;
+}
+
+.nav-item.active {
+  background: #24453f;
+  color: #fff;
+}
+
+.station-picker {
+  display: grid;
+  gap: 12px;
+}
+
+label {
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+select {
+  width: 100%;
+  border: 1px solid #31504a;
+  border-radius: 8px;
+  padding: 12px;
+  color: #fff;
+  background: #17332f;
+}
+
+.direction-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 8px;
+  background: #17332f;
+}
+
+.service-toggle {
+  width: min(360px, 100%);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin: 0 auto 24px;
+  padding: 4px;
+  border-radius: 8px;
+  background: #e7ebe9;
+}
+
+.seg {
+  padding: 10px;
+  color: #c9d7d3;
+  background: transparent;
+}
+
+.seg.active,
+.day-seg.active {
+  color: #102623;
+  background: var(--gold);
+}
+
+.day-seg {
+  min-height: 44px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  font-weight: 850;
+}
+
+.ghost-button {
+  padding: 11px 13px;
+  color: var(--accent-strong);
+  background: #e4f2ed;
+  font-weight: 700;
+}
+
+.rail .ghost-button {
+  color: #fff;
+  background: #31504a;
+}
+
+main {
+  min-width: 0;
+  padding: 28px;
+}
+
+.view {
+  display: none;
+}
+
+.view.active {
+  display: block;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.topbar h2 {
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  line-height: 1.05;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+.primary-button,
+.icon-button {
+  min-height: 42px;
+  padding: 0 16px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 800;
+}
+
+.icon-button {
+  width: 42px;
+  padding: 0;
+  font-size: 1.25rem;
+}
+
+.alert-strip {
+  display: none;
+  margin-bottom: 18px;
+  padding: 14px 16px;
+  border-left: 4px solid var(--warn);
+  border-radius: 8px;
+  background: #fff3df;
+  color: #5b3511;
+  font-weight: 700;
+}
+
+.alert-strip.visible {
+  display: block;
+}
+
+.commute-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.8fr) minmax(260px, 0.7fr);
+  gap: 18px;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+}
+
+.hero-panel,
+.compact-panel,
+.station-results {
+  padding: 20px;
+}
+
+.panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.panel-header h3 {
+  font-size: 1.25rem;
+}
+
+.status-pill,
+.train-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  border-radius: 999px;
+  padding: 0 10px;
+  background: #e8f4ef;
+  color: var(--accent-strong);
+  font-size: 0.78rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.timeline,
+.train-list,
+.coffee-grid,
+.schedule-list {
+  display: grid;
+  gap: 12px;
+}
+
+.train-card {
+  display: grid;
+  grid-template-columns: 92px 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfcfb;
+}
+
+.schedule-board {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.schedule-controls {
+  padding: 24px;
+  border-bottom: 1px solid var(--line);
+}
+
+.route-picker {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 52px minmax(0, 1fr);
+  align-items: end;
+  gap: 16px;
+}
+
+.route-picker label {
+  display: grid;
+  gap: 8px;
+  color: var(--muted);
+}
+
+.route-picker select {
+  min-height: 56px;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  background: #f0f2f1;
+  font-size: 1.2rem;
+  font-weight: 850;
+}
+
+.swap-button {
+  width: 52px;
+  height: 56px;
+  border: 0;
+  border-radius: 8px;
+  color: #fff;
+  background: var(--accent);
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: 900;
+}
+
+.schedule-list {
+  gap: 0;
+}
+
+.schedule-row {
+  display: grid;
+  grid-template-columns: 130px minmax(220px, 1fr) 170px 120px;
+  align-items: center;
+  gap: 20px;
+  min-height: 116px;
+  padding: 20px 28px;
+  border-bottom: 1px solid var(--line);
+  background: repeating-linear-gradient(45deg, #fbfbfb 0, #fbfbfb 8px, #f3f5f4 8px, #f3f5f4 14px);
+}
+
+.schedule-row:last-child {
+  border-bottom: 0;
+}
+
+.schedule-number {
+  font-size: 1.7rem;
+  font-weight: 900;
+}
+
+.schedule-time {
+  font-size: clamp(1.45rem, 3vw, 2.15rem);
+  font-weight: 850;
+}
+
+.schedule-duration,
+.schedule-eta {
+  font-size: 1.08rem;
+  font-weight: 850;
+}
+
+.schedule-kind,
+.schedule-label {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 750;
+}
+
+.train-time {
+  font-size: 1.45rem;
+  font-weight: 850;
+}
+
+.train-meta {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.delay {
+  color: var(--warn);
+  font-weight: 850;
+}
+
+.danger {
+  color: var(--danger);
+}
+
+.stats {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+}
+
+.stats div {
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.stats div:last-child {
+  border-bottom: 0;
+}
+
+dt {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+dd {
+  margin: 4px 0 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.map-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(320px, 0.8fr);
+  gap: 18px;
+  min-height: 660px;
+}
+
+#stationMap {
+  min-height: 660px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.coffee-card {
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.coffee-card h3 {
+  font-size: 1.05rem;
+}
+
+.coffee-card p {
+  color: var(--muted);
+}
+
+.coffee-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 920px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .rail {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    padding: 14px;
+    gap: 14px;
+  }
+
+  .brand p {
+    display: none;
+  }
+
+  .nav {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .direction-toggle {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .station-picker {
+    grid-template-columns: 1fr;
+  }
+
+  main {
+    padding: 18px;
+  }
+
+  .topbar {
+    margin-bottom: 14px;
+  }
+
+  .topbar h2 {
+    font-size: 1.45rem;
+    line-height: 1.15;
+  }
+
+  .panel-header h3 {
+    font-size: 1.05rem;
+  }
+
+  .commute-grid,
+  .map-layout,
+  .coffee-grid,
+  .route-picker {
+    grid-template-columns: 1fr;
+  }
+
+  .swap-button {
+    width: 100%;
+  }
+
+  .schedule-row {
+    grid-template-columns: 1fr 1fr;
+    min-height: 0;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .schedule-number {
+    font-size: 1.35rem;
+  }
+
+  .schedule-time {
+    font-size: 1.35rem;
+  }
+
+  .schedule-duration,
+  .schedule-eta {
+    font-size: 1rem;
+  }
+
+  #stationMap,
+  .map-layout {
+    min-height: 440px;
+  }
+}
+
+@media (max-width: 620px) {
+  .topbar,
+  .actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .train-card {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .train-time {
+    font-size: 1.2rem;
+  }
+
+  .schedule-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 14px;
+  }
+
+  .schedule-controls {
+    padding: 16px;
+  }
+
+  .route-picker {
+    gap: 10px;
+  }
+
+  .route-picker select {
+    min-height: 48px;
+    font-size: 1rem;
+  }
+
+  .service-toggle {
+    margin-bottom: 16px;
+  }
+
+  .day-seg {
+    min-height: 38px;
+  }
+
+  .schedule-number {
+    font-size: 1.2rem;
+  }
+
+  .schedule-time {
+    font-size: 1.18rem;
+  }
+
+  .schedule-kind,
+  .schedule-label,
+  .train-meta {
+    font-size: 0.82rem;
+  }
+
+  .schedule-duration,
+  .schedule-eta {
+    font-size: 0.95rem;
+  }
+
+  .hero-panel,
+  .compact-panel,
+  .station-results {
+    padding: 14px;
+  }
+}

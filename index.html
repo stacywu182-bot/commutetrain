@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Caltrain Commute</title>
+    <link rel="preconnect" href="https://unpkg.com" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="rail">
+        <div class="brand">
+          <div class="brand-mark">CT</div>
+          <div>
+            <h1>Caltrain Commute</h1>
+            <p>Morning decisions, faster.</p>
+          </div>
+        </div>
+
+        <nav class="nav" aria-label="Primary">
+          <button class="nav-item active" data-view="dashboard" type="button">
+            <span>Today</span>
+          </button>
+          <button class="nav-item" data-view="schedule" type="button">
+            <span>Schedule</span>
+          </button>
+          <button class="nav-item" data-view="map" type="button">
+            <span>Map</span>
+          </button>
+          <button class="nav-item" data-view="coffee" type="button">
+            <span>Coffee</span>
+          </button>
+        </nav>
+
+        <div class="station-picker">
+          <label for="stationSelect">Pinned station</label>
+          <select id="stationSelect"></select>
+          <div class="direction-toggle" role="group" aria-label="Direction">
+            <button class="seg active" data-direction="north" type="button">To SF</button>
+            <button class="seg" data-direction="south" type="button">South</button>
+          </div>
+          <button id="nearestBtn" class="ghost-button" type="button">Use nearest station</button>
+        </div>
+      </aside>
+
+      <main>
+        <section id="dashboard" class="view active" aria-label="Commute dashboard">
+          <header class="topbar">
+            <div>
+              <p class="eyebrow">Next 2 hours</p>
+              <h2 id="dashboardTitle">Sunnyvale to San Francisco</h2>
+            </div>
+            <div class="actions">
+              <button id="refreshBtn" class="icon-button" type="button" title="Refresh">R</button>
+              <button id="notifyBtn" class="primary-button" type="button">Enable alerts</button>
+            </div>
+          </header>
+
+          <div id="alertStrip" class="alert-strip"></div>
+
+          <section class="commute-grid">
+            <div class="panel hero-panel">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Leave window</p>
+                  <h3 id="leaveWindow">Checking trains...</h3>
+                </div>
+                <span id="statusPill" class="status-pill">Syncing</span>
+              </div>
+              <div class="timeline" id="timeline"></div>
+            </div>
+
+            <div class="panel compact-panel">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Pinned</p>
+                  <h3 id="pinnedStation">Sunnyvale</h3>
+                </div>
+              </div>
+              <dl class="stats">
+                <div>
+                  <dt>Updated</dt>
+                  <dd id="updatedAt">--</dd>
+                </div>
+                <div>
+                  <dt>Direction</dt>
+                  <dd id="directionLabel">Northbound</dd>
+                </div>
+                <div>
+                  <dt>Trains watched</dt>
+                  <dd id="trainCount">0</dd>
+                </div>
+              </dl>
+            </div>
+          </section>
+        </section>
+
+        <section id="schedule" class="view" aria-label="Route schedule">
+          <header class="topbar">
+            <div>
+              <p class="eyebrow">Route planner</p>
+              <h2 id="scheduleTitle">Sunnyvale to San Francisco</h2>
+            </div>
+          </header>
+
+          <section class="schedule-board">
+            <div class="schedule-controls">
+              <div class="service-toggle" role="group" aria-label="Service day">
+                <button class="day-seg active" data-service="weekday" type="button">Weekday</button>
+                <button class="day-seg" data-service="weekend" type="button">Weekend</button>
+              </div>
+
+              <div class="route-picker">
+                <label>
+                  From
+                  <select id="routeFrom"></select>
+                </label>
+                <button id="swapRouteBtn" class="swap-button" type="button" title="Swap stations">-&gt;</button>
+                <label>
+                  To
+                  <select id="routeTo"></select>
+                </label>
+              </div>
+            </div>
+
+            <div id="scheduleList" class="schedule-list"></div>
+          </section>
+        </section>
+
+        <section id="map" class="view" aria-label="Station map">
+          <header class="topbar">
+            <div>
+              <p class="eyebrow">All stations</p>
+              <h2>Pick any station</h2>
+            </div>
+          </header>
+          <div class="map-layout">
+            <div id="stationMap"></div>
+            <div class="panel station-results">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Selected</p>
+                  <h3 id="mapStationName">Sunnyvale</h3>
+                </div>
+              </div>
+              <div id="mapTrainList" class="train-list"></div>
+            </div>
+          </div>
+        </section>
+
+        <section id="coffee" class="view" aria-label="Coffee nearby">
+          <header class="topbar">
+            <div>
+              <p class="eyebrow">Delay backup</p>
+              <h2 id="coffeeTitle">Coffee near Sunnyvale</h2>
+            </div>
+            <button id="coffeeRefreshBtn" class="ghost-button" type="button">Find nearby coffee</button>
+          </header>
+          <div id="coffeeGrid" class="coffee-grid"></div>
+        </section>
+      </main>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="main.js"></script>
+  </body>
+</html>
