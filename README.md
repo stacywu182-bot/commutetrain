@@ -1,29 +1,30 @@
-# Caltrain Commute
+# CommuteTrain
 
-A first-pass web app for daily Caltrain commuting decisions:
-
-- Pin a default station and direction.
-- See the next two hours of trains with train number, departure time, and delay state.
-- Enable browser notifications for delayed watched trains.
-- Plan station-to-station trips with scheduled departure and estimated arrival times.
-- Open a station map and manually pick a station toward San Francisco or southbound.
-- Find nearby coffee shops for delay time.
+CommuteTrain is a mobile-friendly Caltrain companion for checking scheduled trains, planning station-to-station trips, and finding a coffee fallback when the wait is long.
 
 ## Live Site
 
-https://commutetrain.vercel.app
-
-Custom domain added in Vercel:
-
+- https://commutetrain.vercel.app
 - https://commutetrain.com
-- https://www.commutetrain.com
 
-DNS still needs to be configured at the domain registrar:
+## Features
 
-- `A` record: `commutetrain.com` -> `76.76.21.21`
-- `A` record: `www.commutetrain.com` -> `76.76.21.21`
+- Pin a favorite Caltrain station and direction.
+- See scheduled departures for the next two hours.
+- Choose an "Aim for" buffer: 5, 10, 15, 30, or 45 minutes before departure.
+- Plan a route by selecting a start station and destination station.
+- Compare weekday and weekend scheduled trips.
+- View all Caltrain stations on a map.
+- Find nearby coffee shops using OpenStreetMap Overpass, with fallback suggestions.
+- Enjoy lightweight commute animations on refresh and station changes.
 
-## Run
+## Data
+
+Train times currently use Caltrain's public static GTFS schedule feed, bundled into `schedule-data.js`.
+
+Realtime delay, vehicle position, and service alert support is planned for a future version using 511 SF Bay GTFS-Realtime feeds after an API token is available.
+
+## Run Locally
 
 ```powershell
 node server.js
@@ -35,24 +36,14 @@ Then open:
 http://127.0.0.1:5173
 ```
 
-## Data Notes
-
-This app uses the public Caltrain static GTFS schedule feed for scheduled train times. Realtime delay, vehicle position, and service alert data should connect to 511 SF Bay GTFS-Realtime feeds after a 511 API token is available.
-
-Coffee search uses OpenStreetMap Overpass when available and falls back to curated local examples.
-
 ## Refresh Schedule Data
 
-Download the current Caltrain GTFS zip and rebuild `schedule-data.js`:
+Download the current Caltrain GTFS zip, expand it locally, then rebuild `schedule-data.js`:
 
 ```powershell
 node scripts/build-schedule.js C:\tmp\caltrain-gtfs\feed schedule-data.js
 ```
 
-## Publish With Vercel
+## Deploy
 
-1. Create a GitHub repo and upload this folder.
-2. Import the repo in Vercel.
-3. Keep the default framework settings.
-4. Add `commutetrain.app` in Vercel project settings under Domains after buying the domain.
-5. Update DNS records at your domain registrar using the records Vercel shows.
+The app is deployed on Vercel as a static site. Push changes to GitHub, then deploy through Vercel.
